@@ -1,0 +1,13 @@
+﻿@page "/games"
+@using Microsoft.AspNetCore.Authorization
+@using ViewModels.Games
+
+@inherits MvvmComponentBase<GamesViewModel>
+
+@attribute [Authorize]
+
+<p>Current count: @Bind(x => x.CurrentCount)</p>
+
+<button class="btn btn-primary" @onclick="@BindingContext.IncrementCount">Click me</button>
+
+<p>Time: @Bind(x => x.DateTime)</p>

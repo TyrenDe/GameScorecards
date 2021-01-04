@@ -1,0 +1,65 @@
+﻿@page "/register"
+@using Microsoft.AspNetCore.Authorization
+@using ViewModels.Authentication
+
+@inherits MvvmComponentBase<RegisterViewModel>
+
+<EditForm Model="BindingContext" OnValidSubmit="BindingContext.RegisterAsync" class="pt-4">
+  <DataAnnotationsValidator />
+  <div class="py-4">
+    <div class=" row form-group ">
+      <div class="col-6 offset-3 ">
+        <div class="card border">
+          <div class="card-body px-lg-5 pt-4">
+            <h3 class="col-12 text-success text-center py-2">
+              <strong>Sign Up</strong>
+            </h3>
+
+            <div>
+              @foreach (var message in BindingContext.Messages)
+              {
+                <p class="text-danger text-center">@message</p>
+              }
+            </div>
+
+            <hr style="background-color:aliceblue" />
+            <div class="py-2">
+              <InputText @bind-Value="BindingContext.Name" class="form-control" placeholder="Name..." />
+              <ValidationMessage For="(()=>BindingContext.Name)" />
+
+            </div>
+            <div class="py-2">
+              <InputText @bind-Value="BindingContext.Email" class="form-control" placeholder="Email..." />
+              <ValidationMessage For="(()=>BindingContext.Email)" />
+
+            </div>
+            <div class="form-row py-2">
+              <div class="col">
+                <InputText @bind-Value="BindingContext.Password" type="password" id="password" placeholder="Password..." class="form-control" />
+                <ValidationMessage For="(()=>BindingContext.Password)" />
+              </div>
+              <div class="col">
+                <InputText @bind-Value="BindingContext.ConfirmPassword" type="password" id="confirm" class="form-control" placeholder="Confirm Password..." />
+                <ValidationMessage For="(()=>BindingContext.ConfirmPassword)" />
+              </div>
+
+            </div>
+            <hr style="background-color:aliceblue" />
+            <div class="py-2">
+              @if (BindingContext.IsBusy)
+              {
+                <button type="submit" class="btn btn-success btn-block disabled"><i class="fas fa-sign-in-alt"></i> Please Wait...</button>
+              }
+              else
+              {
+                <button type="submit" class="btn btn-success btn-block"><i class="fas fa-sign-in-alt"></i> Register</button>
+              }
+            </div>
+
+
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</EditForm>
