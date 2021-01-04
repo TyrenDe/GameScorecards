@@ -6,8 +6,7 @@
 
 @attribute [Authorize]
 
-<p>Current count: @Bind(x => x.CurrentCount)</p>
-
-<button class="btn btn-primary" @onclick="@BindingContext.IncrementCount">Click me</button>
-
-<p>Time: @Bind(x => x.DateTime)</p>
+@foreach(var game in BindingContext.Games)
+{
+  <p>Game Id: game.Id</p>
+}

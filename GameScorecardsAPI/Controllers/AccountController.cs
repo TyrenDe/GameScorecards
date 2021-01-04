@@ -18,7 +18,9 @@ using System.Threading.Tasks;
 namespace GameScorecardsAPI.Controllers
 {
     [ApiController]
-    [Route("api/v1/[controller]")]
+    [Route("api/v{version:apiversion}/[controller]")]
+    [ApiVersion("1.0")]
+    [ApiExplorerSettings(GroupName = "v1")]
     public class AccountController : Controller
     {
         private readonly SignInManager<ApplicationUser> m_SigninManager;

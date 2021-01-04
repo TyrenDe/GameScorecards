@@ -1,7 +1,6 @@
 ﻿using GameScorecardsClient.Services.Authentication;
 using GameScorecardsModels.Account;
 using Microsoft.AspNetCore.Components;
-using System;
 using System.ComponentModel.DataAnnotations;
 using System.Threading.Tasks;
 

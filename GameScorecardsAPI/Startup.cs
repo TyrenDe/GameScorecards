@@ -2,25 +2,22 @@ using AutoMapper;
 using GameScorecardsAPI.Settings;
 using GameScorecardsDataAccess;
 using GameScorecardsDataAccess.Models;
+using GameScorecardsDataAccess.Repositories;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.HttpsPolicy;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Versioning;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Newtonsoft.Json.Serialization;
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace GameScorecardsAPI
 {
@@ -33,9 +30,16 @@ namespace GameScorecardsAPI
 
         public IConfiguration Configuration { get; }
 
-        // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddApiVersioning(options =>
+            {
+                options.ReportApiVersions = true;
+                options.DefaultApiVersion = new ApiVersion(1, 0);
+                options.AssumeDefaultVersionWhenUnspecified = true;
+                options.ApiVersionReader = new HeaderApiVersionReader("X-API-Version");
+            });
+
             services.Configure<APISettings>(Configuration.GetSection("APISettings"));
 
             services.AddDbContext<ApplicationDbContext>(options => options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
@@ -70,9 +74,11 @@ namespace GameScorecardsAPI
             services.AddRouting(option => option.LowercaseUrls = true);
 
             services.AddScoped<IDbInitializer, DbInitializer>();
+            services.AddScoped<IGamesRepository, GamesRepository>();
 
             services.AddCors(o => o.AddPolicy("GameScorecardsAPI", builder =>
             {
+                // TODO: Clean this up for production
                 builder.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader();
             }));
 
@@ -86,7 +92,8 @@ namespace GameScorecardsAPI
                 });
             services.AddSwaggerGen(c =>
             {
-                c.SwaggerDoc("v1", new OpenApiInfo { Title = "GameScorecardsAPI", Version = "v1" });
+                // TODO: Add this line for each version
+                c.SwaggerDoc("v1", new OpenApiInfo { Title = "GameScorecardsAPI V1", Version = "v1" });
 
                 c.AddSecurityDefinition(
                     "Bearer",
@@ -116,7 +123,6 @@ namespace GameScorecardsAPI
             });
         }
 
-        // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env, IDbInitializer dbInitializer)
         {
             if (env.IsDevelopment())
@@ -125,6 +131,7 @@ namespace GameScorecardsAPI
             }
 
             app.UseSwagger();
+            // TODO: Add this line for each version 
             app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "GameScorecardsAPI v1"));
             app.UseHttpsRedirection();
 

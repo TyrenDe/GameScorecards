@@ -1,5 +1,6 @@
 using Blazored.LocalStorage;
 using GameScorecardsClient.Services.Authentication;
+using GameScorecardsClient.Services.Games;
 using GameScorecardsClient.Services.Storage;
 using GameScorecardsClient.ViewModels.Authentication;
 using GameScorecardsClient.ViewModels.Games;
@@ -8,12 +9,9 @@ using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
 using MvvmBlazor.Extensions;
 using System;
-using System.Collections.Generic;
 using System.Net.Http;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace GameScorecardsClient
@@ -32,6 +30,7 @@ namespace GameScorecardsClient
             builder.Services.AddMvvm();
             builder.Services.AddScoped<AuthenticationStateProvider, GameScorecardAuthenticationStateProvider>();
             builder.Services.AddScoped<IAuthenticationService, AuthenticationService>();
+            builder.Services.AddScoped<IGamesService, GamesService>();
             builder.Services.AddScoped<IStorageService, StorageService>();
 
             builder.Services.AddTransient<GamesViewModel>();

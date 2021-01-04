@@ -1,9 +1,6 @@
 ﻿using GameScorecardsClient.Services.Storage;
 using Microsoft.AspNetCore.Components.Authorization;
-using System;
-using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
-using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Security.Claims;

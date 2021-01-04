@@ -2,13 +2,7 @@
 using GameScorecardsModels;
 using GameScorecardsModels.Account;
 using Microsoft.AspNetCore.Components.Authorization;
-using Newtonsoft.Json;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Net.Http;
-using System.Text;
-using System.Threading;
 using System.Threading.Tasks;
 
 namespace GameScorecardsClient.Services.Authentication
@@ -16,9 +10,7 @@ namespace GameScorecardsClient.Services.Authentication
     public interface IAuthenticationService
     {
         Task<RestResponse<SignInResponse, ErrorResponse>> RegisterAsync(RegisterRequest request);
-
         Task<RestResponse<SignInResponse, ErrorResponse>> SignInAsync(SignInRequest request);
-
         Task LogoutAsync();
     }
 

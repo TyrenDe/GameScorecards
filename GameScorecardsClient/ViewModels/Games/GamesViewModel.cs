@@ -1,51 +1,36 @@
-﻿using MvvmBlazor.ViewModel;
-using System;
+﻿using GameScorecardsClient.Services.Games;
+using GameScorecardsModels.Games;
+using MvvmBlazor.ViewModel;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
-using System.Timers;
 
 namespace GameScorecardsClient.ViewModels.Games
 {
     public class GamesViewModel : ViewModelBase
     {
-        private int m_CurrentCount = 0;
-        public int CurrentCount
+        private readonly IGamesService m_GamesService;
+
+        private IEnumerable<Game> m_Games;
+        public IEnumerable<Game> Games
         {
-            get => m_CurrentCount;
-            private set => Set(ref m_CurrentCount, value);
+            get => m_Games;
+            private set => Set(ref m_Games, value);
         }
 
-        public void IncrementCount()
+        public override async Task OnInitializedAsync()
         {
-            CurrentCount++;
+            var response = await m_GamesService.GetAllMyGamesAsync();
+            if (response?.Response != null)
+            {
+                m_Games = response.Response;
+            }
+
+            await base.OnInitializedAsync();
         }
 
-        private readonly Timer _timer;
-        private DateTime m_DateTime = DateTime.Now;
-
-        public GamesViewModel()
+        public GamesViewModel(IGamesService gamesService)
         {
-            _timer = new Timer(TimeSpan.FromSeconds(1).TotalMilliseconds);
-            _timer.Elapsed += TimerOnElapsed;
-            _timer.Start();
-        }
-
-        public DateTime DateTime
-        {
-            get => m_DateTime;
-            set => Set(ref m_DateTime, value);
-        }
-
-        private void TimerOnElapsed(object sender, ElapsedEventArgs e)
-        {
-            DateTime = DateTime.Now;
-        }
-
-        protected override void Dispose(bool disposing)
-        {
-            if (disposing)
-                _timer.Dispose();
+            m_GamesService = gamesService;
         }
     }
 }
