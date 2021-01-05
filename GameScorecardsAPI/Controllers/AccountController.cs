@@ -1,4 +1,5 @@
-﻿using GameScorecardsAPI.Settings;
+﻿using GameScorecardsAPI.Exceptions;
+using GameScorecardsAPI.Settings;
 using GameScorecardsDataAccess.Models;
 using GameScorecardsModels;
 using GameScorecardsModels.Account;
@@ -41,14 +42,9 @@ namespace GameScorecardsAPI.Controllers
         }
 
         [HttpPost("register")]
-        public async Task<ActionResult<RestResponse<SignInResponse>>> RegisterAsync([FromBody] RestRequest<RegisterRequest> request, CancellationToken token)
+        public async Task<RestResponse<SignInResponse>> RegisterAsync([FromBody] RestRequest<RegisterRequest> request, CancellationToken token)
         {
             token.ThrowIfCancellationRequested();
-
-            var response = new RestResponse<SignInResponse>
-            {
-                RequestId = request.RequestId,
-            };
 
             var user = new ApplicationUser
             {
@@ -61,45 +57,38 @@ namespace GameScorecardsAPI.Controllers
             var createResult = await m_UserManager.CreateAsync(user, request.Request.Password);
             if (!createResult.Succeeded)
             {
-                response.Message = string.Join("\r\n", createResult.Errors.Select(e => e.Description));
-                response.StatusCode = System.Net.HttpStatusCode.BadRequest;
-                return BadRequest(response);
+                throw new HttpBadRequestException(string.Join("\r\n", createResult.Errors.Select(e => e.Description)));
             }
 
             var result = await SignInAsync(request.Request.Email, request.Request.Password, token);
             if (result != null)
             {
-                response.StatusCode = System.Net.HttpStatusCode.OK;
-                response.Result = result;
-                return Ok(response);
+                return new RestResponse<SignInResponse>
+                {
+                    StatusCode = System.Net.HttpStatusCode.OK,
+                    Result = result,
+                };
             }
 
-            response.StatusCode = System.Net.HttpStatusCode.Unauthorized;
-            response.Message = "Unauthorized";
-            return Unauthorized(response);
+            throw new HttpUnauthorizedException("Unauthorized: Unable to sign in.");
         }
 
         [HttpPost("signin")]
-        public async Task<ActionResult<RestResponse<SignInResponse>>> SignInAsync([FromBody] RestRequest<SignInRequest> request, CancellationToken token)
+        public async Task<RestResponse<SignInResponse>> SignInAsync([FromBody] RestRequest<SignInRequest> request, CancellationToken token)
         {
             token.ThrowIfCancellationRequested();
-
-            var response = new RestResponse<SignInResponse>
-            {
-                RequestId = request.RequestId,
-            };
 
             var result = await SignInAsync(request.Request.Email, request.Request.Password, token);
             if (result != null)
             {
-                response.StatusCode = System.Net.HttpStatusCode.OK;
-                response.Result = result;
-                return Ok(response);
+                return new RestResponse<SignInResponse>
+                {
+                    StatusCode = System.Net.HttpStatusCode.OK,
+                    Result = result,
+                };
             }
 
-            response.StatusCode = System.Net.HttpStatusCode.Unauthorized;
-            response.Message = "Unauthorized";
-            return Unauthorized(response);
+            throw new HttpUnauthorizedException("Unauthorized: Unable to sign in.");
         }
 
         private async Task<SignInResponse> SignInAsync(string email, string password, CancellationToken token)

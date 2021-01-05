@@ -7,7 +7,6 @@ namespace GameScorecardsModels
 {
     public class RestResponse
     {
-        public string RequestId { get; set; }
         public HttpStatusCode StatusCode { get; set; }
         public bool IsSuccessStatusCode => (int)StatusCode >= 200 && (int)StatusCode < 300;
         public string Message { get; set; }

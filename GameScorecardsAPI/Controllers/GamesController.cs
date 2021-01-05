@@ -37,7 +37,6 @@ namespace GameScorecardsAPI.Controllers
 
             var response = new RestResponse<IEnumerable<GameScorecardsModels.Games.Game>>
             {
-                RequestId = requestId,
                 StatusCode = System.Net.HttpStatusCode.OK,
                 Result = mappedGames,
             };

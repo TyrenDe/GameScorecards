@@ -94,6 +94,7 @@ namespace GameScorecardsAPI
             {
                 // TODO: Add this line for each version
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "GameScorecardsAPI V1", Version = "v1" });
+                c.OperationFilter<RequestIdSwaggerAttribute>();
 
                 c.AddSecurityDefinition(
                     "Bearer",
@@ -130,6 +131,7 @@ namespace GameScorecardsAPI
                 app.UseDeveloperExceptionPage();
             }
 
+            app.UseMiddleware<ExceptionMiddleware>();
             app.UseSwagger();
             // TODO: Add this line for each version 
             app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "GameScorecardsAPI v1"));
