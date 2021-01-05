@@ -20,7 +20,7 @@ namespace GameScorecardsClient.ViewModels.Authentication
         private string m_Email;
         private string m_Password;
         private bool m_IsBusy = false;
-        private IEnumerable<string> m_Messages = Array.Empty<string>();
+        private string m_Message = string.Empty;
         private string m_ReturnUrl;
 
         [Required]
@@ -33,7 +33,7 @@ namespace GameScorecardsClient.ViewModels.Authentication
 
         public bool IsBusy { get => m_IsBusy; set => Set(ref m_IsBusy, value); }
 
-        public IEnumerable<string> Messages { get => m_Messages; set => Set(ref m_Messages, value); }
+        public string Message { get => m_Message; set => Set(ref m_Message, value); }
 
         public string ReturnUrl { get => m_ReturnUrl; set => Set(ref m_ReturnUrl, value); }
 
@@ -46,20 +46,25 @@ namespace GameScorecardsClient.ViewModels.Authentication
         public async Task SignInAsync()
         {
             IsBusy = true;
-            
-            var response = await m_AuthenticationService.SignInAsync(new SignInRequest { Email = Email, Password = Password });
-            HandleResponse(response);
+
+            var request = new RestRequest<SignInRequest>
+            {
+                Request = new SignInRequest { Email = Email, Password = Password },
+            };
+
+            var response = await m_AuthenticationService.SignInAsync(request);
+            HandleSignInResponse(response);
 
             IsBusy = false;
         }
 
-        protected void HandleResponse(RestResponse<SignInResponse, ErrorResponse> response)
+        protected void HandleSignInResponse(RestResponse<SignInResponse> response)
         {
-            if (response.Error != null)
+            if (!response.IsSuccessStatusCode)
             {
-                Messages = response?.Error?.Messages ?? Array.Empty<string>();
+                Message = response.Message;
             }
-            else if (response?.Response?.Succeeded ?? false)
+            else if (response.Result?.Succeeded ?? false)
             {
                 var absoluteUri = new Uri(m_NavigationManager.Uri);
                 var queryParam = HttpUtility.ParseQueryString(absoluteUri.Query);

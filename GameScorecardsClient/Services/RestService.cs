@@ -6,6 +6,7 @@ using System.Linq;
 using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
+using System.Web;
 
 namespace GameScorecardsClient.Services
 {
@@ -18,41 +19,32 @@ namespace GameScorecardsClient.Services
             HttpClient = client;
         }
 
-        protected async Task<RestResponse<TResponse, ErrorResponse>> GetAsync<TResponse>(string uri)
+        protected async Task<RestResponse<TResponse>> GetAsync<TResponse>(string uri)
         {
-            var response = await HttpClient.GetAsync(uri);
-            return await HandleResponseAsync<TResponse>(response);
+            return await GetAsync<TResponse>(uri, null);
         }
 
-        protected async Task<RestResponse<TResponse, ErrorResponse>> PostAsync<TRequest, TResponse>(string uri, TRequest request)
+        protected async Task<RestResponse<TResponse>> GetAsync<TResponse>(string uri, string requestId)
+        {
+            if (!string.IsNullOrEmpty(requestId))
+            {
+                uri = uri.AddParameter("requestId", requestId);
+            }
+
+            var response = await HttpClient.GetAsync(uri);
+            var contentTemp = await response.Content.ReadAsStringAsync();
+            return JsonConvert.DeserializeObject<RestResponse<TResponse>>(contentTemp);
+        }
+
+        protected async Task<RestResponse<TResponse>> PostAsync<TRequest, TResponse>(string uri, RestRequest<TRequest> request)
+            where TRequest : class
         {
             var content = JsonConvert.SerializeObject(request);
             var bodyContent = new StringContent(content, Encoding.UTF8, "application/json");
 
             var response = await HttpClient.PostAsync(uri, bodyContent);
-            return await HandleResponseAsync<TResponse>(response);
-        }
-
-        // TODO: Add PATCH, DELETE, PUT, etc
-
-        private static async Task<RestResponse<TResponse, ErrorResponse>> HandleResponseAsync<TResponse>(HttpResponseMessage response)
-        {
-            var result = new RestResponse<TResponse, ErrorResponse>
-            {
-                StatusCode = response.StatusCode,
-            };
-
             var contentTemp = await response.Content.ReadAsStringAsync();
-            if (response.IsSuccessStatusCode)
-            {
-                result.Response = JsonConvert.DeserializeObject<TResponse>(contentTemp);
-            }
-            else
-            {
-                result.Error = JsonConvert.DeserializeObject<ErrorResponse>(contentTemp);
-            }
-
-            return result;
+            return JsonConvert.DeserializeObject<RestResponse<TResponse>>(contentTemp);
         }
     }
 }

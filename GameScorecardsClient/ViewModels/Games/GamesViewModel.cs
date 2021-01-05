@@ -1,6 +1,7 @@
 ﻿using GameScorecardsClient.Services.Games;
 using GameScorecardsModels.Games;
 using MvvmBlazor.ViewModel;
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
@@ -10,7 +11,7 @@ namespace GameScorecardsClient.ViewModels.Games
     {
         private readonly IGamesService m_GamesService;
 
-        private IEnumerable<Game> m_Games;
+        private IEnumerable<Game> m_Games = Array.Empty<Game>();
         public IEnumerable<Game> Games
         {
             get => m_Games;
@@ -20,9 +21,9 @@ namespace GameScorecardsClient.ViewModels.Games
         public override async Task OnInitializedAsync()
         {
             var response = await m_GamesService.GetAllMyGamesAsync();
-            if (response?.Response != null)
+            if (response?.Result!= null)
             {
-                m_Games = response.Response;
+                Games = response.Result;
             }
 
             await base.OnInitializedAsync();

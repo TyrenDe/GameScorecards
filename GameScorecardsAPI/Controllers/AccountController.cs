@@ -41,62 +41,65 @@ namespace GameScorecardsAPI.Controllers
         }
 
         [HttpPost("register")]
-        public async Task<ActionResult<SignInResponse>> RegisterAsync([FromBody] RegisterRequest request, CancellationToken token)
+        public async Task<ActionResult<RestResponse<SignInResponse>>> RegisterAsync([FromBody] RestRequest<RegisterRequest> request, CancellationToken token)
         {
             token.ThrowIfCancellationRequested();
 
-            if (request == null)
+            var response = new RestResponse<SignInResponse>
             {
-                return BadRequest(new ErrorResponse { Messages = new string[] { "No RegisterRequest was supplied." } });
-            }
+                RequestId = request.RequestId,
+            };
 
             var user = new ApplicationUser
             {
-                UserName = request.Email,
-                Email = request.Email,
-                Name = request.Name,
+                UserName = request.Request.Email,
+                Email = request.Request.Email,
+                Name = request.Request.Name,
                 EmailConfirmed = true,
             };
 
-            var createResult = await m_UserManager.CreateAsync(user, request.Password);
+            var createResult = await m_UserManager.CreateAsync(user, request.Request.Password);
             if (!createResult.Succeeded)
             {
-                var errors = createResult.Errors.Select(e => e.Description);
-                return BadRequest(new ErrorResponse { Messages = errors });
+                response.Message = string.Join("\r\n", createResult.Errors.Select(e => e.Description));
+                response.StatusCode = System.Net.HttpStatusCode.BadRequest;
+                return BadRequest(response);
             }
 
-            var result = await SignInAsync(request.Email, request.Password, token);
+            var result = await SignInAsync(request.Request.Email, request.Request.Password, token);
             if (result != null)
             {
-                return Ok(result);
+                response.StatusCode = System.Net.HttpStatusCode.OK;
+                response.Result = result;
+                return Ok(response);
             }
 
-            return Unauthorized(new ErrorResponse
-            {
-                Messages = new string[] { "Invalid Authentication" },
-            });
+            response.StatusCode = System.Net.HttpStatusCode.Unauthorized;
+            response.Message = "Unauthorized";
+            return Unauthorized(response);
         }
 
         [HttpPost("signin")]
-        public async Task<ActionResult<SignInResponse>> SignInAsync([FromBody] SignInRequest request, CancellationToken token)
+        public async Task<ActionResult<RestResponse<SignInResponse>>> SignInAsync([FromBody] RestRequest<SignInRequest> request, CancellationToken token)
         {
             token.ThrowIfCancellationRequested();
 
-            if (request == null)
+            var response = new RestResponse<SignInResponse>
             {
-                return BadRequest(new ErrorResponse { Messages = new string[] { "No SignInRequest was supplied." } });
-            }
+                RequestId = request.RequestId,
+            };
 
-            var result = await SignInAsync(request.Email, request.Password, token);
+            var result = await SignInAsync(request.Request.Email, request.Request.Password, token);
             if (result != null)
             {
-                return Ok(result);
+                response.StatusCode = System.Net.HttpStatusCode.OK;
+                response.Result = result;
+                return Ok(response);
             }
 
-            return Unauthorized(new ErrorResponse
-            {
-                Messages = new string[] { "Invalid Authentication" },
-            });
+            response.StatusCode = System.Net.HttpStatusCode.Unauthorized;
+            response.Message = "Unauthorized";
+            return Unauthorized(response);
         }
 
         private async Task<SignInResponse> SignInAsync(string email, string password, CancellationToken token)

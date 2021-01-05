@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using GameScorecardsDataAccess.Repositories;
+using GameScorecardsModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System;
@@ -26,18 +27,26 @@ namespace GameScorecardsAPI.Controllers
         }
 
         [HttpGet("allmygames")]
-        public async Task<ActionResult<IEnumerable<GameScorecardsModels.Games.Game>>> GetAllMyGamesAsync()
+        public async Task<RestResponse<IEnumerable<GameScorecardsModels.Games.Game>>> GetAllMyGamesAsync([FromQuery]string requestId)
         {
             var userId = User.Claims.FirstOrDefault(c => c.Type == "Id")?.Value;
             var games = await m_GamesRepository.GetAllGamesByUserIdAsync(userId);
             var mappedGames = m_Mapper.Map<
                 IEnumerable<GameScorecardsDataAccess.Models.Game>,
                 IEnumerable<GameScorecardsModels.Games.Game>>(games);
-            return Ok(mappedGames);
+
+            var response = new RestResponse<IEnumerable<GameScorecardsModels.Games.Game>>
+            {
+                RequestId = requestId,
+                StatusCode = System.Net.HttpStatusCode.OK,
+                Result = mappedGames,
+            };
+
+            return response;
         }
 
         [HttpPost("create")]
-        public async Task<GameScorecardsModels.Games.Game> CreateGameAsync()
+        public async Task<RestResponse<GameScorecardsModels.Games.Game>> CreateGameAsync([FromBody]RestRequest request)
         {
             var userId = User.Claims.FirstOrDefault(c => c.Type == "Id")?.Value;
             await Task.Delay(100);
@@ -50,8 +59,9 @@ namespace GameScorecardsAPI.Controllers
         }
 
         [HttpPatch("addplayertogame")]
-        public async Task<GameScorecardsModels.Games.Game> AddPlayerToGameAsync(string userId)
+        public async Task<RestResponse<GameScorecardsModels.Games.Game>> AddPlayerToGameAsync([FromBody] RestRequest request)
         {
+            var userId = User.Claims.FirstOrDefault(c => c.Type == "Id")?.Value;
             await Task.Delay(100);
             throw new NotImplementedException(userId);
             //var games = await m_GamesRepository.GetAllGamesByUserIdAsync(userId);

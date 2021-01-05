@@ -10,10 +10,7 @@
   <EditForm Model="BindingContext" OnValidSubmit="BindingContext.SignInAsync">
     <DataAnnotationsValidator />
 
-    @foreach (var message in BindingContext.Messages)
-    {
-      <p class="text-center text-danger">@message</p>
-    }
+    <p class="text-center text-danger">@Bind(x => x.Message)</p>
 
     <InputText @bind-Value="BindingContext.Email" id="email" placeholder="Email" class="form-control mb-2" />
     <ValidationMessage For="(()=>BindingContext.Email)"></ValidationMessage>

@@ -9,8 +9,8 @@ namespace GameScorecardsClient.Services.Authentication
 {
     public interface IAuthenticationService
     {
-        Task<RestResponse<SignInResponse, ErrorResponse>> RegisterAsync(RegisterRequest request);
-        Task<RestResponse<SignInResponse, ErrorResponse>> SignInAsync(SignInRequest request);
+        Task<RestResponse<SignInResponse>> RegisterAsync(RestRequest<RegisterRequest> request);
+        Task<RestResponse<SignInResponse>> SignInAsync(RestRequest<SignInRequest> request);
         Task LogoutAsync();
     }
 
@@ -32,24 +32,24 @@ namespace GameScorecardsClient.Services.Authentication
             ((GameScorecardAuthenticationStateProvider)m_AuthenticationStateProvider).NotifyUserLogout();
         }
 
-        public async Task<RestResponse<SignInResponse, ErrorResponse>> RegisterAsync(RegisterRequest request)
+        public async Task<RestResponse<SignInResponse>> RegisterAsync(RestRequest<RegisterRequest> request)
         {
             var response = await PostAsync<RegisterRequest, SignInResponse>("api/v1/account/register", request);
             return await HandleResponseAsync(response);
         }
 
-        public async Task<RestResponse<SignInResponse, ErrorResponse>> SignInAsync(SignInRequest request)
+        public async Task<RestResponse<SignInResponse>> SignInAsync(RestRequest<SignInRequest> request)
         {
             var response = await PostAsync<SignInRequest, SignInResponse>("api/v1/account/signin", request);
             return await HandleResponseAsync(response);
         }
 
-        private async Task<RestResponse<SignInResponse, ErrorResponse>> HandleResponseAsync(RestResponse<SignInResponse, ErrorResponse> response)
+        private async Task<RestResponse<SignInResponse>> HandleResponseAsync(RestResponse<SignInResponse> response)
         {
-            if (response?.Response?.Succeeded ?? false)
+            if (response?.Result?.Succeeded ?? false)
             {
-                await m_Storage.SetAuthTokenAsync(response.Response.Token);
-                ((GameScorecardAuthenticationStateProvider)m_AuthenticationStateProvider).NotifyUserLoggedIn(response.Response.Token);
+                await m_Storage.SetAuthTokenAsync(response.Result.Token);
+                ((GameScorecardAuthenticationStateProvider)m_AuthenticationStateProvider).NotifyUserLoggedIn(response.Result.Token);
             }
             else
             {

@@ -1,4 +1,5 @@
 ﻿using GameScorecardsClient.Services.Authentication;
+using GameScorecardsModels;
 using GameScorecardsModels.Account;
 using Microsoft.AspNetCore.Components;
 using System.ComponentModel.DataAnnotations;
@@ -27,8 +28,13 @@ namespace GameScorecardsClient.ViewModels.Authentication
         {
             IsBusy = true;
 
-            var response = await m_AuthenticationService.RegisterAsync(new RegisterRequest { Name = Name, Email = Email, Password = Password });
-            HandleResponse(response);
+            var request = new RestRequest<RegisterRequest>
+            {
+                Request = new RegisterRequest { Name = Name, Email = Email, Password = Password },
+            };
+
+            var response = await m_AuthenticationService.RegisterAsync(request);
+            HandleSignInResponse(response);
 
             IsBusy = false;
         }
